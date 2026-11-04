@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Career Skills Matcher</title>
+<meta name="description" content="Pick up to five skills you enjoy and see which careers might suit you.">
+<meta name="theme-color" content="#b0102b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Skills Matcher">
+<style>
+  :root {
+    --bg: #faf7f4;
+    --surface: #ffffff;
+    --ink: #1f1d1c;
+    --muted: #6b6461;
+    --line: #e7e0db;
+    --accent: #b0102b;
+    --accent-ink: #ffffff;
+    --accent-soft: #fbe9ec;
+    --gold: #c98a12;
+    --radius: 18px;
+    --shadow: 0 1px 2px rgba(31,29,28,.06), 0 8px 24px rgba(31,29,28,.06);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.4;
+    -webkit-tap-highlight-color: transparent;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 120px; }
+  .logos { display: flex; align-items: center; gap: 24px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .logos img { display: block; width: auto; }
+  .logo-vm { height: 34px; }
+  .logo-nw { height: 46px; border-radius: 4px; }
+  @media (max-width: 560px) { .logo-vm { height: 26px; } .logo-nw { height: 36px; } }
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .eyebrow { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; }
+  h1 { font-size: clamp(28px, 4.2vw, 44px); line-height: 1.05; margin: 0; letter-spacing: -.02em; }
+  .lede { color: var(--muted); font-size: 18px; margin: 10px 0 0; max-width: 38ch; }
+
+  .counter { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--muted); }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); transition: background .15s, border-color .15s; }
+  .dot.on { background: var(--accent); border-color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .skill {
+    appearance: none; border: 2px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: var(--radius); padding: 16px 14px; min-height: 76px;
+    display: flex; align-items: center; gap: 12px; text-align: left;
+    font: inherit; font-size: 17px; font-weight: 600; cursor: pointer;
+    box-shadow: var(--shadow); transition: transform .08s, border-color .15s, background .15s;
+    touch-action: manipulation; position: relative;
+  }
+  .skill:active { transform: scale(.98); }
+  .skill .ic { font-size: 28px; line-height: 1; flex: none; }
+  .skill[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .skill[aria-pressed="true"]::after {
+    content: "✓"; position: absolute; top: 8px; right: 10px; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-ink); font-size: 14px; display: grid; place-items: center;
+  }
+  .skill:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+  .skill:focus-visible, .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    background: rgba(250,247,244,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+  }
+  .bar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .bar-inner[hidden] { display: none; }
+  .hint { color: var(--muted); font-size: 16px; }
+  .btn {
+    appearance: none; border: 0; border-radius: 999px; padding: 16px 28px; min-height: 56px;
+    font: inherit; font-size: 18px; font-weight: 700; cursor: pointer; touch-action: manipulation;
+  }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:disabled { background: #d9cfca; color: #fff; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--line); }
+
+  /* Results */
+  #results[hidden], #picker[hidden] { display: none; }
+  .chosen { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 26px; }
+  .tag { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 15px; font-weight: 600; }
+  .match { background: var(--surface); border-radius: 24px; box-shadow: var(--shadow); padding: 22px; margin-bottom: 22px; border: 1px solid var(--line); }
+  .match-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  .rank { display: inline-block; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); }
+  .match.second .rank { background: var(--ink); }
+  .match h2 { font-size: clamp(22px, 3vw, 30px); margin: 10px 0 2px; letter-spacing: -.01em; }
+  .match .tl { color: var(--muted); margin: 0 0 10px; font-size: 17px; }
+  .why { font-size: 16px; margin: 0 0 16px; }
+  .why b { color: var(--accent); }
+  .slide-btn { display: block; width: 100%; padding: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; cursor: zoom-in; }
+  .slide-btn img { display: block; width: 100%; height: auto; }
+  .slide-note { color: var(--muted); font-size: 14px; margin: 10px 2px 0; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .slide-note a { color: var(--accent); font-weight: 700; }
+  .match.second .slide-btn { max-width: 760px; }
+
+  /* Fullscreen slide */
+  .viewer { position: fixed; inset: 0; z-index: 20; background: rgba(20,18,17,.92); display: none; align-items: center; justify-content: center; padding: 20px; }
+  .viewer.open { display: flex; }
+  .viewer img { max-width: 100%; max-height: 100%; border-radius: 10px; background: #fff; }
+  .viewer .close { position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 16px; background: #fff; color: var(--ink); }
+
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .skill { font-size: 15px; padding: 12px; min-height: 68px; }
+    .skill .ic { font-size: 24px; }
+    .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="picker">
+    <div class="logos">
+      <img src="logos/virgin-money.png" alt="Virgin Money" class="logo-vm">
+      <img src="logos/nationwide.png" alt="Nationwide" class="logo-nw">
+    </div>
+    <header>
+      <div>
+        <p class="eyebrow">Career Skills Matcher</p>
+        <h1>What are you good at?</h1>
+        <p class="lede">Tap up to five skills you enjoy using, and we'll show you the jobs that might suit you best.</p>
+      </div>
+      <div class="counter" aria-live="polite">
+        <div class="dots" id="dots" aria-hidden="true"></div>
+        <span id="countText">0 of 5 chosen</span>
+      </div>
+    </header>
+    <div class="grid" id="grid" role="group" aria-label="Skills"></div>
+  </section>
+
+  <section id="results" hidden>
+    <header>
+      <div>
+        <p class="eyebrow">Your matches</p>
+        <h1>Careers that could suit you</h1>
+        <div class="chosen" id="chosen"></div>
+      </div>
+    </header>
+    <div id="matches"></div>
+  </section>
+
+</div>
+
+<div class="bar">
+  <div class="bar-inner" id="barPicker">
+    <span class="hint" id="hint">Choose at least one skill to begin.</span>
+    <span style="display:flex;gap:10px;margin-left:auto">
+      <button class="btn btn-ghost" id="clearBtn" type="button">Clear</button>
+      <button class="btn btn-primary" id="goBtn" type="button" disabled>Find my matches</button>
+    </span>
+  </div>
+  <div class="bar-inner" id="barResults" hidden>
+    <span class="hint">Scan the QR code on a slide to explore live vacancies.</span>
+    <span style="display:flex;gap:10px;margin-left:auto">
+      <button class="btn btn-ghost" id="editBtn" type="button">Change skills</button>
+      <button class="btn btn-primary" id="restartBtn" type="button">Start again</button>
+    </span>
+  </div>
+</div>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Slide">
+  <img id="viewerImg" alt="">
+  <button class="btn close" id="viewerClose" type="button">Close</button>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  const selected = new Set();
+  const $ = (id) => document.getElementById(id);
+  const grid = $("grid"), dots = $("dots");
+
+  // Build skill buttons
+  SKILLS.forEach((s) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "skill"; b.dataset.id = s.id;
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = '<span class="ic" aria-hidden="true">' + s.icon + "</span><span>" + s.label + "</span>";
+    b.addEventListener("click", () => toggle(s.id));
+    grid.appendChild(b);
+  });
+  for (let i = 0; i < MAX_PICKS; i++) dots.appendChild(document.createElement("span")).className = "dot";
+
+  function toggle(id) {
+    if (selected.has(id)) selected.delete(id);
+    else if (selected.size < MAX_PICKS) selected.add(id);
+    render();
+  }
+
+  function render() {
+    const full = selected.size >= MAX_PICKS;
+    grid.querySelectorAll(".skill").forEach((b) => {
+      const on = selected.has(b.dataset.id);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.disabled = full && !on;
+    });
+    [...dots.children].forEach((d, i) => d.classList.toggle("on", i < selected.size));
+    $("countText").textContent = selected.size + " of " + MAX_PICKS + " chosen";
+    $("goBtn").disabled = selected.size === 0;
+    $("hint").textContent = selected.size === 0 ? "Choose at least one skill to begin."
+      : full ? "That's five — you're ready!" : "You can choose " + (MAX_PICKS - selected.size) + " more.";
+  }
+
+  function score() {
+    const picks = SKILLS.filter((s) => selected.has(s.id));
+    const order = Object.keys(ROLES);
+    const rows = order.map((key, idx) => {
+      const hits = picks.filter((s) => s.w[key]).sort((a, b) => b.w[key] - a.w[key]);
+      const total = hits.reduce((n, s) => n + s.w[key], 0);
+      // Strongest single link breaks ties, then the number of matching skills
+      const top = hits.length ? hits[0].w[key] : 0;
+      return { key, idx, total, top, hits };
+    });
+    rows.sort((a, b) => b.total - a.total || b.top - a.top || b.hits.length - a.hits.length || a.idx - b.idx);
+    return { picks, rows };
+  }
+
+  function listLabels(arr) {
+    const l = arr.map((s) => "<b>" + s.label.toLowerCase() + "</b>");
+    return l.length < 2 ? l.join("") : l.slice(0, -1).join(", ") + " and " + l[l.length - 1];
+  }
+
+  function matchCard(row, rankText, cls) {
+    const r = ROLES[row.key];
+    const why = row.hits.length
+      ? "Matches your " + listLabels(row.hits) + "."
+      : "A good area to explore alongside your top match.";
+    return '<article class="match ' + cls + '">' +
+      '<div class="match-head"><span class="rank">' + rankText + "</span></div>" +
+      "<h2>" + r.title + "</h2>" +
+      '<p class="tl">' + r.tagline + "</p>" +
+      '<p class="why">' + why + "</p>" +
+      '<button class="slide-btn" type="button" data-src="' + r.slide + '" aria-label="Enlarge the ' + r.title + ' slide">' +
+        '<img src="' + r.slide + '" alt="' + r.title + ' slide: ' + r.roleTypes + '. Includes a QR code to the careers website." loading="eager">' +
+      "</button>" +
+      '<p class="slide-note"><span>Tap the slide to make it bigger.</span>' +
+      '<a href="' + CAREERS_URL + '" target="_blank" rel="noopener">Open careers site ↗</a></p>' +
+      "</article>";
+  }
+
+  function showResults() {
+    const { picks, rows } = score();
+    $("chosen").innerHTML = picks.map((s) => '<span class="tag">' + s.icon + " " + s.label + "</span>").join("");
+    $("matches").innerHTML = matchCard(rows[0], "Best match", "first") + matchCard(rows[1], "Second best match", "second");
+    $("picker").hidden = true; $("results").hidden = false;
+    $("barPicker").hidden = true; $("barResults").hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  function showPicker() {
+    $("results").hidden = true; $("picker").hidden = false;
+    $("barResults").hidden = true; $("barPicker").hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  $("goBtn").addEventListener("click", showResults);
+  $("clearBtn").addEventListener("click", () => { selected.clear(); render(); });
+  $("editBtn").addEventListener("click", showPicker);
+  $("restartBtn").addEventListener("click", () => { selected.clear(); render(); showPicker(); });
+
+  // Fullscreen slide viewer
+  const viewer = $("viewer");
+  $("matches").addEventListener("click", (e) => {
+    const b = e.target.closest(".slide-btn");
+    if (!b) return;
+    $("viewerImg").src = b.dataset.src;
+    viewer.classList.add("open");
+  });
+  const closeViewer = () => viewer.classList.remove("open");
+  $("viewerClose").addEventListener("click", closeViewer);
+  viewer.addEventListener("click", (e) => { if (e.target === viewer) closeViewer(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeViewer(); });
+
+  render();
+
+  // Offline support
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  }
+})();
+</script>
+</body>
+</html>
