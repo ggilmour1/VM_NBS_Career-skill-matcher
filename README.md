@@ -2,14 +2,13 @@
 
 A small offline-capable web app: people pick up to 5 of 20 skills and see their best and second-best matching job families, each shown with its careers slide (including the QR code).
 
+This is designed purely to be a conversation starter, and to allow young people to see the range of careers available at Virgin Money and Nationwide
+
 Built from "Careers within Virgin Money" (FY25), role slides 2–8.
 
 ## Put it on GitHub Pages
 
-1. On github.com, click **New repository**, call it e.g. `skills-matcher`, set it to **Public**, and create it.
-2. On the new repo page click **uploading an existing file**, drag in *everything in this folder* (keep the `slides` and `icons` folders), and click **Commit changes**.
-3. Go to **Settings → Pages**. Under *Build and deployment* choose **Deploy from a branch**, branch **main**, folder **/ (root)**, then **Save**.
-4. After a minute your link appears at the top of that page: `https://<your-username>.github.io/skills-matcher/`
+1. You can access this directly using the link https://ggilmour1.github.io/VM_NBS_Career-skill-matcher/ 
 
 ## Use it offline on an iPad
 
