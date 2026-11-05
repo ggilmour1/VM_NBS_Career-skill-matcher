@@ -1,6 +1,6 @@
 // Caches every file the app needs so it works with no internet connection.
 // Bump VERSION whenever you change any file, so devices pick up the update.
-const VERSION = "skills-matcher-v2";
+const VERSION = "skills-matcher-v3";
 const FILES = [
   "./",
   "index.html",

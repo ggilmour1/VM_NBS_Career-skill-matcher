@@ -1,7 +1,7 @@
 // Job families taken from the role slides (2–8) of "Careers within Virgin Money" (FY25).
 // Each skill carries weights (1–3) for the job families it matches.
 
-const CAREERS_URL = "https://careers.virginmoney.com/our-jobs";
+const CAREERS_URL = "https://nationwide-jobs.co.uk";
 
 const ROLES = {
   cs:   { title: "Customer Service and Administration", tagline: "Customer champions",
